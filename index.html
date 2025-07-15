@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zenless Zone Zero Character Sorter</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: 'Inter', sans-serif; /* Using Inter font */
+      text-align: center;
+      padding: 2em;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 1em;
+      color: #eee;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .char {
+      display: inline-block;
+      width: 300px;
+      margin: 1em;
+      background-color: #222;
+      border-radius: 12px;
+      padding: 1em;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease-in-out;
+    }
+    .char:hover {
+      transform: translateY(-5px);
+    }
+    .char img {
+      width: 250px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 3px solid #666;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .char-name {
+      margin-top: 0.8em;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #fff;
+    }
+    .buttons button {
+      margin: 0.7em;
+      padding: 1em 2.5em;
+      font-size: 1.1em;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .buttons button:hover {
+      background-color: #666;
+      transform: translateY(-2px);
+    }
+    .buttons button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .results {
+      margin-top: 2em;
+      background-color: #222;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      width: 80%;
+      max-width: 700px;
+      text-align: left;
+    }
+    .results h2 {
+      text-align: center;
+      color: #eee;
+      margin-bottom: 1.5em;
+      font-size: 2em;
+    }
+    .results ol {
+      list-style: none;
+      padding: 0;
+    }
+    .results li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1em;
+      background-color: #333;
+      padding: 0.8em 1.2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      font-size: 1.1em;
+    }
+    .results li:nth-child(odd) {
+      background-color: #3a3a3a;
+    }
+    .results img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-right: 1.2em;
+      border: 2px solid #555;
+    }
+    .setup {
+      max-width: 600px;
+      margin: auto;
+      text-align: left;
+      background-color: #222;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .setup h2 {
+      text-align: center;
+      margin-bottom: 1.5em;
+      color: #eee;
+    }
+    .setup label {
+      display: block;
+      margin-bottom: 0.8em;
+      font-size: 1.1em;
+      color: #ccc;
+    }
+    .setup input[type="checkbox"] {
+      margin-right: 0.8em;
+      transform: scale(1.2);
+      vertical-align: middle;
+    }
+    .setup button {
+      display: block;
+      width: 80%;
+      margin: 2em auto 0;
+      padding: 1em 2em;
+      font-size: 1.2em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .setup button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+    .message-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: none; /* Hidden by default */
+    }
+    .message-box button {
+      margin-top: 15px;
+      padding: 8px 15px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+    .message-box button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Zenless Zone Zero Character Sorter</h1>
+
+<div id="setup" class="setup">
+  <h2>Select Factions to Include:</h2>
+  <label><input type="checkbox" class="faction-filter" value="Phaethon" checked> Phaethon</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Cunning Hares" checked> Cunning Hares</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Belobog Industries" checked> Belobog Industries</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Victoria Housekeeping Co." checked> Victoria Housekeeping Co.</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Obol Squad" checked> Obol Squad</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Silver Squad" checked> Silver Squad</label><br>
+  <label><input type="checkbox" class="faction-filter" value="N.E.P.S" checked> N.E.P.S</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Sons of Calydon" checked> Sons of Calydon</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Section 6" checked> Section 6</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Stars of Lyra" checked> Stars of Lyra</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Mockingbird" checked> Mockingbird</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Yunkui Summit" checked> Yunkui Summit</label><br>
+  <label><input type="checkbox" class="faction-filter" value="Spook Shack" checked> Spook Shack</label><br>
+  <button onclick="initSort()">Start Sorting</button>
+</div>
+
+<div id="sorter" style="display:none; display: flex; justify-content: center; align-items: center; flex-wrap: wrap;">
+  <div class="char" id="charA"><img id="imgA" src=""><div class="char-name" id="nameA"></div></div>
+  <div class="char" id="charB"><img id="imgB" src=""><div class="char-name" id="nameB"></div></div>
+  <div class="buttons" style="width: 100%; text-align: center; margin-top: 2em;">
+    <button onclick="choose(0)">← Choose A</button>
+    <button onclick="tie()">Tie</button>
+    <button onclick="choose(1)">Choose B →</button>
+    <button onclick="undo()">Undo</button>
+  </div>
+</div>
+
+<div id="results" class="results" style="display:none;"></div>
+
+<div id="messageBox" class="message-box">
+  <p id="messageText"></p>
+  <button onclick="document.getElementById('messageBox').style.display = 'none';">OK</button>
+</div>
+
+<script>
+// Array of all characters with their name, image path, and faction.
+const allCharacters = [
+  { name: "Belle", img: "images/Belle.png", faction: "Phaethon" },
+  { name: "Wise", img: "images/Wise.png", faction: "Phaethon" },
+  { name: "Anby Demara", img: "images/Anby_Demara.png", faction: "Cunning Hares" },
+  { name: "Billy Kid", img: "images/Billy_Kid.png", faction: "Cunning Hares" },
+  { name: "Nicole Demara", img: "images/Nicole_Demara.png", faction: "Cunning Hares" },
+  { name: "Nekomiya Mana", img: "images/Nekomiya_Mana.png", faction: "Cunning Hares" },
+  { name: "Anton Ivanov", img: "images/Anton_Ivanov.png", faction: "Belobog Industries" },
+  { name: "Ben Bigger", img: "images/Ben_Bigger.png", faction: "Belobog Industries" },
+  { name: "Koleda Belobog", img: "images/Koleda_Belobog.png", faction: "Belobog Industries" },
+  { name: "Grace Howard", img: "images/Grace_Howard.png", faction: "Belobog Industries" },
+  { name: "Corin Wickes", img: "images/Corin_Wickes.png", faction: "Victoria Housekeeping Co." },
+  { name: "Alexandrina “Rina” Sebastiane", img: "images/Alexandrina_Rina_Sebastiane.png", faction: "Victoria Housekeeping Co." },
+  { name: "Von Lycaon", img: "images/Von_Lycaon.png", faction: "Victoria Housekeeping Co." },
+  { name: "Ellen Joe", img: "images/Ellen_Joe.png", faction: "Victoria Housekeeping Co." },
+  { name: "Soldier 11", img: "images/Soldier11.png", faction: "Obol Squad" },
+  { name: "Trigger", img: "images/Trigger.png", faction: "Obol Squad" },
+  { name: "Soldier 0: Anby", img: "images/Soldier_0_Anby.png", faction: "Silver Squad" },
+  { name: "Zhu Yuan", img: "images/Zhu_Yuan.png", faction: "N.E.P.S" },
+  { name: "Qingyi", img: "images/Qingyi.png", faction: "N.E.P.S" },
+  { name: "Jane Doe", img: "images/Jane_Doe.png", faction: "N.E.P.S" },
+  { name: "Seth Lowell", img: "images/Seth_Lowell.png", faction: "N.E.P.S" },
+  { name: "Caesar King", img: "images/Caesar_King.png", faction: "Sons of Calydon" },
+  { name: "Luciana de Montefio", img: "images/Luciana_de_Montefio.png", faction: "Sons of Calydon" },
+  { name: "Piper Wheel", img: "images/Piper_Wheel.png", faction: "Sons of Calydon" },
+  { name: "Burnice White", img: "images/Burnice_White.png", faction: "Sons of Calydon" },
+  { name: "Lighter", img: "images/Lighter.png", faction: "Sons of Calydon" },
+  { name: "Pulchra Fellini", img: "images/Pulchra_Fellini.png", faction: "Sons of Calydon" },
+  { name: "Hoshimi Miyabi", img: "images/Hoshimi_Miyabi.png", faction: "Section 6" },
+  { name: "Soukaku", img: "images/Soukaku.png", faction: "Section 6" },
+  { name: "Tsukishiro Yanagi", img: "images/Tsukishiro_Yanagi.png", faction: "Section 6" },
+  { name: "Asaba Harumasa", img: "images/Asaba_Harumasa.png", faction: "Section 6" },
+  { name: "Astra Yao", img: "images/Astra_Yao.png", faction: "Stars of Lyra" },
+  { name: "Evelyn Chevalier", img: "images/Evelyn_Chevalier.png", faction: "Stars of Lyra" },
+  { name: "Hugo Vlad", img: "images/Hugo_Vlad.png", faction: "Mockingbird" },
+  { name: "Vivian Banshee", img: "images/Vivian_Banshee.png", faction: "Mockingbird" },
+  { name: "Ju Fufu", img: "images/Ju_Fufu.png", faction: "Yunkui Summit" },
+  { name: "Pan Yinhu", img: "images/Pan_Yinhu.png", faction: "Yunkui Summit" },
+  { name: "Yixuan", img: "images/Yixuan.png", faction: "Yunkui Summit" },
+  { name: "Ukinami Yuzuha", img: "images/Ukinami_Yuzuha.png", faction: "Spook Shack" },
+  { name: "Alice Thymefield", img: "images/Alice_Thymefield.png", faction: "Spook Shack" }
+];
+
+let workingList = []; // The list of characters selected for sorting
+let history = [];     // Stores states for undo functionality
+
+// Merge sort specific variables
+let rounds = [];        // An array of "levels" for the merge sort. Each level contains pairs to be merged.
+let currentRound = [];  // The current level of pairs being processed.
+let matchPointer = 0;   // Index of the current pair within currentRound.
+let leftList = [];      // The left sub-list in the current comparison.
+let rightList = [];     // The right sub-list in the current comparison.
+let mergedList = [];    // The list being built from the current comparison.
+let resultList = [];    // The final sorted list of characters.
+
+/**
+ * Displays a custom message box instead of using alert().
+ * @param {string} message The message to display.
+ */
+function showMessageBox(message) {
+  document.getElementById('messageText').textContent = message;
+  document.getElementById('messageBox').style.display = 'block';
+}
+
+/**
+ * Shuffles an array using the Fisher-Yates (Knuth) algorithm.
+ * @param {Array} array The array to shuffle.
+ * @returns {Array} The shuffled array.
+ */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/**
+ * Initializes the sorting process.
+ * Filters characters based on selected factions, shuffles them,
+ * and sets up the initial round for the merge sort.
+ */
+function initSort() {
+  const allowedFactions = Array.from(document.querySelectorAll('.faction-filter:checked')).map(e => e.value);
+  workingList = allCharacters.filter(c => allowedFactions.includes(c.faction));
+
+  if (workingList.length < 2) {
+    showMessageBox("Please select at least two characters to start sorting.");
+    return;
+  }
+
+  // Hide setup, show sorter
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('sorter').style.display = 'flex'; // Use flex for centering char divs
+
+  workingList = shuffle(workingList);
+
+  // Initialize the first level of the merge sort.
+  // Each character is treated as a sorted list of length 1.
+  let initialPairs = [];
+  for (let i = 0; i < workingList.length; i += 2) {
+    if (i + 1 < workingList.length) {
+      initialPairs.push([[workingList[i]], [workingList[i+1]]]);
+    } else {
+      initialPairs.push([[workingList[i]], []]); // Handle odd number of characters
+    }
+  }
+  rounds = [initialPairs]; // 'rounds' stores levels of merges. The first level is `initialPairs`.
+  currentRound = rounds[0]; // Set the current round to the first level.
+  matchPointer = 0;         // Start at the beginning of the current round.
+
+  // Clear previous state for a new sort
+  history = [];
+  leftList = [];
+  rightList = [];
+  mergedList = [];
+  resultList = [];
+
+  nextMatch(); // Start the first comparison
+}
+
+/**
+ * Proceeds to the next comparison pair in the current round,
+ * or moves to the next round of merging if the current one is complete.
+ * If all rounds are complete, it shows the final results.
+ */
+function nextMatch() {
+  // If the current round is exhausted
+  if (matchPointer >= currentRound.length) {
+    // Collect all merged results from the completed current round
+    const mergedResultsOfCurrentRound = currentRound.map(pair => pair.merged);
+
+    // If only one merged list remains, the entire sorting is complete.
+    if (mergedResultsOfCurrentRound.length <= 1) {
+      resultList = mergedResultsOfCurrentRound[0] || []; // Get the final sorted list
+      rounds = []; // Clear rounds to signal completion
+      return showResults();
+    }
+
+    // Create the next level of comparison pairs from the merged results
+    let nextLevelPairs = [];
+    for (let i = 0; i < mergedResultsOfCurrentRound.length; i += 2) {
+      if (i + 1 < mergedResultsOfCurrentRound.length) {
+        nextLevelPairs.push([mergedResultsOfCurrentRound[i], mergedResultsOfCurrentRound[i+1]]);
+      } else {
+        nextLevelPairs.push([mergedResultsOfCurrentRound[i], []]); // Handle odd number of lists
+      }
+    }
+
+    rounds.shift(); // Remove the completed current round from 'rounds'
+    rounds.unshift(nextLevelPairs); // Add the new level to the beginning of 'rounds'
+    currentRound = rounds[0]; // Update currentRound to the new level
+    matchPointer = 0;         // Reset pointer for the new level
+    // Recursively call nextMatch to start processing the new level
+    return nextMatch();
+  }
+
+  // Get the next comparison pair from the current round
+  [leftList, rightList] = currentRound[matchPointer];
+  mergedList = []; // Reset mergedList for the new pair comparison
+
+  compareNext(); // Display the characters for comparison
+}
+
+/**
+ * Compares the current characters from leftList and rightList and displays them.
+ * If one list is empty, it automatically merges the remaining elements of the other list.
+ * If both lists are empty, it marks the current pair comparison as complete.
+ */
+function compareNext() {
+  // If both left and right lists for the current pair are empty, this comparison is done.
+  if (leftList.length === 0 && rightList.length === 0) {
+    // Store the final merged list for this pair back into the currentRound structure.
+    currentRound[matchPointer].merged = mergedList;
+    matchPointer++; // Move to the next comparison pair in the current round.
+    return nextMatch(); // Check if the current round is complete or proceed to the next pair.
+  }
+
+  // If leftList is empty, add remaining elements from rightList to mergedList.
+  if (leftList.length === 0) {
+    mergedList.push(rightList.shift());
+    return compareNext(); // Continue merging remaining elements without user input.
+  }
+
+  // If rightList is empty, add remaining elements from leftList to mergedList.
+  if (rightList.length === 0) {
+    mergedList.push(leftList.shift());
+    return compareNext(); // Continue merging remaining elements without user input.
+  }
+
+  // Display the current characters for comparison
+  document.getElementById('imgA').src = leftList[0].img;
+  document.getElementById('imgA').onerror = function() { this.src = 'https://placehold.co/250x250/FF0000/FFFFFF?text=Image+Error'; }; // Fallback for image loading errors
+  document.getElementById('nameA').textContent = leftList[0].name;
+
+  document.getElementById('imgB').src = rightList[0].img;
+  document.getElementById('imgB').onerror = function() { this.src = 'https://placehold.co/250x250/FF0000/FFFFFF?text=Image+Error'; }; // Fallback for image loading errors
+  document.getElementById('nameB').textContent = rightList[0].name;
+}
+
+/**
+ * Handles the user's choice between character A (0) or B (1).
+ * Adds the chosen character to the merged list and proceeds to the next comparison.
+ * @param {number} choice 0 for character A, 1 for character B.
+ */
+function choose(choice) {
+  // Save current state to history for undo functionality
+  history.push({
+    left: [...leftList],
+    right: [...rightList],
+    merged: [...mergedList],
+    matchPointer: matchPointer,
+    // Deep copy of rounds and currentRound to ensure undo works correctly
+    rounds: JSON.parse(JSON.stringify(rounds)),
+    currentRound: JSON.parse(JSON.stringify(currentRound))
+  });
+
+  const picked = choice === 0 ? leftList.shift() : rightList.shift();
+  mergedList.push(picked);
+  compareNext();
+}
+
+/**
+ * Handles a "tie" scenario where both characters are added to the merged list.
+ */
+function tie() {
+  // Save current state to history for undo functionality
+  history.push({
+    left: [...leftList],
+    right: [...rightList],
+    merged: [...mergedList],
+    matchPointer: matchPointer,
+    // Deep copy of rounds and currentRound to ensure undo works correctly
+    rounds: JSON.parse(JSON.stringify(rounds)),
+    currentRound: JSON.parse(JSON.stringify(currentRound))
+  });
+
+  mergedList.push(leftList.shift());
+  mergedList.push(rightList.shift());
+  compareNext();
+}
+
+/**
+ * Undoes the last comparison operation, restoring the previous state.
+ */
+function undo() {
+  if (!history.length) {
+    showMessageBox("No more actions to undo.");
+    return;
+  }
+
+  const last = history.pop();
+  leftList = [...last.left];
+  rightList = [...last.right];
+  mergedList = [...last.merged];
+  matchPointer = last.matchPointer;
+  rounds = JSON.parse(JSON.stringify(last.rounds)); // Restore rounds from deep copy
+  currentRound = JSON.parse(JSON.stringify(last.currentRound)); // Restore currentRound from deep copy
+
+  compareNext(); // Resume comparison from the undone state
+}
+
+/**
+ * Displays the final sorted ranking of characters.
+ */
+function showResults() {
+  const container = document.getElementById('results');
+  document.getElementById('sorter').style.display = 'none';
+
+  if (!resultList || !Array.isArray(resultList) || resultList.length === 0) {
+    container.innerHTML = "<h2>No results to display. The sorter may have failed to generate a final list.</h2>";
+    container.style.display = 'block';
+    return;
+  }
+
+  // Generate the HTML for the final ranking list
+  container.innerHTML = "<h2>Final Ranking:</h2><ol>" + resultList.map((c, index) =>
+    `<li><img src="${c.img}" alt="${c.name}" onerror="this.src='https://placehold.co/80x80/FF0000/FFFFFF?text=Image+Error';"><span>${index + 1}. ${c.name}</span></li>`
+  ).join("") + "</ol>";
+
+  container.style.display = 'block';
+}
+</script>
+
+</body>
+</html>
