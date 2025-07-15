@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZZZ Character Sorter</title>
+  <style>
+    body {
+      background: #111; color: #eee; font-family: sans-serif; text-align: center; padding: 2em;
+    }
+    .char {
+      display: inline-block; width: 280px; margin: 1em;
+    }
+    .char img {
+      width: 250px; height: 250px; object-fit: cover;
+      border-radius: 8px; border: 2px solid #444;
+    }
+    .char-name { margin-top: 0.5em; font-weight: bold; }
+    .buttons button {
+      margin: 0.5em; padding: 0.75em 2em;
+      background: #333; color: white; border: none; border-radius: 6px; cursor: pointer;
+    }
+    .buttons button:hover { background: #555; }
+    .results img {
+      width: 100px; height: 100px; object-fit: cover; border-radius: 6px;
+      margin-right: 1em; vertical-align: middle;
+    }
+    .setup { max-width: 500px; margin: auto; text-align: left; }
+  </style>
+</head>
+<body>
+
+<h1>Zenless Zone Zero Character Sorter</h1>
+
+<div id="setup" class="setup">
+  <h2>Select Factions to Include:</h2>
+  <label><input type="checkbox" class="faction-filter" value="Phaethon" checked> Phaethon</label><br>
+<label><input type="checkbox" class="faction-filter" value="Cunning Hares" checked> Cunning Hares</label><br>
+<label><input type="checkbox" class="faction-filter" value="Belobog Industries" checked> Belobog Industries</label><br>
+<label><input type="checkbox" class="faction-filter" value="Victoria Housekeeping Co." checked> Victoria Housekeeping Co.</label><br>
+<label><input type="checkbox" class="faction-filter" value="Obol Squad" checked> Obol Squad</label><br>
+<label><input type="checkbox" class="faction-filter" value="Silver Squad" checked> Silver Squad</label><br>
+<label><input type="checkbox" class="faction-filter" value="N.E.P.S" checked> N.E.P.S</label><br>
+<label><input type="checkbox" class="faction-filter" value="Sons of Calydon" checked> Sons of Calydon</label><br>
+<label><input type="checkbox" class="faction-filter" value="Section 6" checked> Section 6</label><br>
+<label><input type="checkbox" class="faction-filter" value="Stars of Lyra" checked> Stars of Lyra</label><br>
+<label><input type="checkbox" class="faction-filter" value="Mockingbird" checked> Mockingbird</label><br>
+<label><input type="checkbox" class="faction-filter" value="Yunkui Summit" checked> Yunkui Summit</label><br>
+<label><input type="checkbox" class="faction-filter" value="Spook Shack" checked> Spook Shack</label><br>
+  <button onclick="startSorter()">Start Sorting</button>
+</div>
+
+<div id="sorting" style="display:none;">
+  <div class="char" id="charA"><img id="imgA" src=""><div class="char-name" id="nameA"></div></div>
+  <div class="char" id="charB"><img id="imgB" src=""><div class="char-name" id="nameB"></div></div>
+  <div class="buttons">
+    <button onclick="choose(0)">← Choose A</button>
+    <button onclick="tie()">Tie</button>
+    <button onclick="choose(1)">Choose B →</button>
+    <button onclick="undo()">Undo</button>
+  </div>
+</div>
+
+<div id="results" class="results"></div>
+
+<script>
+const allCharacters = [
+  { name: "Belle", img: "images/Belle.png", faction: "Phaethon" },
+  { name: "Wise", img: "images/Wise.png", faction: "Phaethon" },
+  { name: "Anby Demara", img: "images/Anby_Demara.png", faction: "Cunning Hares" },
+  { name: "Billy Kid", img: "images/Billy_Kid.png", faction: "Cunning Hares" },
+  { name: "Nicole Demara", img: "images/Nicole_Demara.png", faction: "Cunning Hares" },
+  { name: "Nekomiya Mana", img: "images/Nekomiya_Mana.png", faction: "Cunning Hares" },
+  { name: "Anton Ivanov", img: "images/Anton_Ivanov.png", faction: "Belobog Industries" },
+  { name: "Ben Bigger", img: "images/Ben_Bigger.png", faction: "Belobog Industries" },
+  { name: "Koleda Belobog", img: "images/Koleda_Belobog.png", faction: "Belobog Industries" },
+  { name: "Grace Howard", img: "images/Grace_Howard.png", faction: "Belobog Industries" },
+  { name: "Corin Wickes", img: "images/Corin_Wickes.png", faction: "Victoria Housekeeping Co." },
+  { name: "Alexandrina “Rina” Sebastiane", img: "images/Alexandrina_Rina_Sebastiane.png", faction: "Victoria Housekeeping Co." },
+  { name: "Von Lycaon", img: "images/Von_Lycaon.png", faction: "Victoria Housekeeping Co." },
+  { name: "Ellen Joe", img: "images/Ellen_Joe.png", faction: "Victoria Housekeeping Co." },
+  { name: "Soldier 11", img: "images/Soldier11.png", faction: "Obol Squad" },
+  { name: "Trigger", img: "images/Trigger.png", faction: "Obol Squad" },
+  { name: "Soldier 0: Anby", img: "images/Soldier_0_Anby.png", faction: "Silver Squad" },
+  { name: "Zhu Yuan", img: "images/Zhu_Yuan.png", faction: "N.E.P.S" },
+  { name: "Qingyi", img: "images/Qingyi.png", faction: "N.E.P.S" },
+  { name: "Jane Doe", img: "images/Jane_Doe.png", faction: "N.E.P.S" },
+  { name: "Seth Lowell", img: "images/Seth_Lowell.png", faction: "N.E.P.S" },
+  { name: "Caesar King", img: "images/Caesar_King.png", faction: "Sons of Calydon" },
+  { name: "Luciana de Montefio", img: "images/Luciana_de_Montefio.png", faction: "Sons of Calydon" },
+  { name: "Piper Wheel", img: "images/Piper_Wheel.png", faction: "Sons of Calydon" },
+  { name: "Burnice White", img: "images/Burnice_White.png", faction: "Sons of Calydon" },
+  { name: "Lighter", img: "images/Lighter.png", faction: "Sons of Calydon" },
+  { name: "Pulchra Fellini", img: "images/Pulchra_Fellini.png", faction: "Sons of Calydon" },
+  { name: "Hoshimi Miyabi", img: "images/Hoshimi_Miyabi.png", faction: "Section 6" },
+  { name: "Soukaku", img: "images/Soukaku.png", faction: "Section 6" },
+  { name: "Tsukishiro Yanagi", img: "images/Tsukishiro_Yanagi.png", faction: "Section 6" },
+  { name: "Asaba Harumasa", img: "images/Asaba_Harumasa.png", faction: "Section 6" },
+  { name: "Astra Yao", img: "images/Astra_Yao.png", faction: "Stars of Lyra" },
+  { name: "Evelyn Chevalier", img: "images/Evelyn_Chevalier.png", faction: "Stars of Lyra" },
+  { name: "Hugo Vlad", img: "images/Hugo_Vlad.png", faction: "Mockingbird" },
+  { name: "Vivian Banshee", img: "images/Vivian_Banshee.png", faction: "Mockingbird" },
+  { name: "Ju Fufu", img: "images/Ju_Fufu.png", faction: "Yunkui Summit" },
+  { name: "Pan Yinhu", img: "images/Pan_Yinhu.png", faction: "Yunkui Summit" },
+  { name: "Yixuan", img: "images/Yixuan.png", faction: "Yunkui Summit" },
+  { name: "Ukinami Yuzuha", img: "images/Ukinami_Yuzuha.png", faction: "Spook Shack" },
+  { name: "Alice Thymefield", img: "images/Alice_Thymefield.png", faction: "Spook Shack" }
+];
+
+let selectedCharacters = [];
+let history = [];
+let sortedList = [];
+
+function startSorter() {
+  const allowedFactions = Array.from(document.querySelectorAll('.faction-filter:checked')).map(e => e.value);
+  selectedCharacters = allCharacters.filter(c => allowedFactions.includes(c.faction));
+  if (selectedCharacters.length < 2) {
+    alert("Select at least two characters.");
+    return;
+  }
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('sorting').style.display = 'block';
+  sortedList = mergeSort(selectedCharacters.map(c => [c]));
+  nextCompare();
+}
+
+let mergeQueue = [], left = [], right = [], result = [];
+
+function mergeSort(arrays) {
+  if (arrays.length <= 1) return arrays[0];
+  let newRound = [];
+  for (let i = 0; i < arrays.length; i += 2) {
+    if (i + 1 < arrays.length) {
+      mergeQueue.push([arrays[i], arrays[i+1]]);
+    } else {
+      newRound.push(...arrays[i]);
+    }
+  }
+  return mergeQueue.length ? newRound : arrays[0];
+}
+
+function nextCompare() {
+  if (mergeQueue.length === 0) {
+    document.getElementById('sorting').style.display = 'none';
+    showResults();
+    return;
+  }
+  [left, right] = mergeQueue.shift();
+  result = [];
+  compareNext();
+}
+
+function compareNext() {
+  if (left.length === 0 && right.length === 0) {
+    sortedList.push(...result);
+    nextCompare();
+    return;
+  }
+  if (left.length === 0) { result.push(...right); right = []; compareNext(); return; }
+  if (right.length === 0) { result.push(...left); left = []; compareNext(); return; }
+
+  let a = left[0], b = right[0];
+  document.getElementById('imgA').src = a.img;
+  document.getElementById('nameA').textContent = a.name;
+  document.getElementById('imgB').src = b.img;
+  document.getElementById('nameB').textContent = b.name;
+}
+
+function choose(winner) {
+  let choice = winner === 0 ? left.shift() : right.shift();
+  result.push(choice);
+  history.push({ left: [...left], right: [...right], result: [...result], winner });
+  compareNext();
+}
+
+function tie() {
+  result.push(left.shift());
+  result.push(right.shift());
+  history.push({ left: [...left], right: [...right], result: [...result], winner: 'tie' });
+  compareNext();
+}
+
+function undo() {
+  if (!history.length) return;
+  const last = history.pop();
+  left = [...last.left];
+  right = [...last.right];
+  result = [...last.result];
+  if (last.winner !== 'tie') {
+    result.pop();
+  } else {
+    result.pop(); result.pop();
+  }
+  compareNext();
+}
+
+function showResults() {
+  const container = document.getElementById('results');
+  container.innerHTML = "<h2>Final Ranking:</h2><ol>" + sortedList.map(c =>
+    `<li><img src="${c.img}">${c.name}</li>`).join("") + "</ol>";
+  container.style.display = 'block';
+}
+</script>
+
+</body>
+</html>
