@@ -126,7 +126,10 @@ function initSort() {
 }
 
 function generateRounds(pairs) {
-  if (pairs.length <= 1) { resultList = pairs[0].merged; return; }
+  if (pairs.length <= 1) {
+  resultList = pairs[0][0];
+  return;
+}
   let round = [];
   for (let i = 0; i < pairs.length; i += 2) {
     if (i + 1 < pairs.length) {
