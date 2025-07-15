@@ -16,17 +16,6 @@ Live Demo
 You can try out the sorter live here:
 https://loporopo.github.io/zzz-sorter/
 
-Project Structure
-To run this project locally or host it on GitHub Pages, ensure you have the following file structure:
-
-your-repo-name/
-├── index.html
-└── images/
-    ├── Belle.png
-    ├── Wise.png
-    ├── Anby_Demara.png
-    └── ... (all other character image files)
-
 The index.html file contains all the necessary HTML, CSS, and JavaScript. The images/ folder should contain all the character image files referenced in the allCharacters array within the index.html script.
 
 Contributing
