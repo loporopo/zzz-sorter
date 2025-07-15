@@ -212,8 +212,12 @@ function undo() {
 function showResults() {
   const container = document.getElementById('results');
   document.getElementById('sorter').style.display = 'none';
+
   container.innerHTML = "<h2>Final Ranking:</h2><ol>" + resultList.map(c =>
-    `<li><img src="${c.img}">${c.name}</li>`).join("") + "</ol>";
+    `<li><img src="${c.img}" alt="${c.name}">${c.name}</li>`
+  ).join("") + "</ol>";
+
+  container.style.display = 'block';
 }
 </script>
 
