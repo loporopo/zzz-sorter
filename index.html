@@ -127,9 +127,9 @@ function initSort() {
 
 function generateRounds(pairs) {
   if (pairs.length <= 1) {
-  resultList = pairs[0][0];
+  resultList = pairs[0].merged;
   return;
-  }
+}
 }
   let round = [];
   for (let i = 0; i < pairs.length; i += 2) {
@@ -214,8 +214,13 @@ function showResults() {
   const container = document.getElementById('results');
   document.getElementById('sorter').style.display = 'none';
 
+  if (!resultList || !Array.isArray(resultList) || resultList.length === 0) {
+    container.innerHTML = "<h2>No results to display. The sorter may have failed to generate a final list.</h2>";
+    return;
+  }
+
   container.innerHTML = "<h2>Final Ranking:</h2><ol>" + resultList.map(c =>
-    `<li><img src="${c.img}" alt="${c.name}">${c.name}</li>`
+    `<li><img src="${c.img}" alt="${c.name}"><span>${c.name}</span></li>`
   ).join("") + "</ol>";
 
   container.style.display = 'block';
